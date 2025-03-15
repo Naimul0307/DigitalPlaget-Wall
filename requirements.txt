@@ -1,0 +1,4 @@
+npm init -y
+npm install express socket.io cors multer fs path sharp open
+npm install express socket.io multer fs path jimp cors
+

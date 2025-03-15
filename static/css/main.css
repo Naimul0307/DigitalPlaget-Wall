@@ -1,0 +1,117 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: url("../background/background3.jpg") no-repeat center center fixed;
+    background-size: cover;
+    width: 100%;
+    height: 100%;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    overflow: hidden !important; /* Prevent scrolling for the entire body */
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+}
+
+h1{
+    color:  rgba(51, 155, 107, 0.911);
+    font-weight: bold;
+}
+
+.section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    margin-top: 120px;
+}
+
+/* For Main Screen */
+/* Container for doodles */
+#doodleDisplay {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    max-width: 100%;
+    max-height: 100%;
+    padding: 20px;
+    margin-top: 150px;
+}
+
+#doodleDisplay img {
+    width:100px;
+    height: auto;
+    margin: 5px;
+    cursor: pointer;
+    transition: transform 0.8s ease-in-out;
+    transform: translateY(20px);
+    background-image: url('../background/stick.png'); /* Replace with your actual image path */
+    background-size: cover; /* Ensures the image covers the entire background */
+    background-repeat: no-repeat; /* Prevents the image from repeating */
+    background-position: center; /* Center the background image */
+    aspect-ratio: 1 / 1;
+    opacity: 1; /* Ensure images are visible */
+    animation: scaleUp 5s ease-in-out infinite; /* Add automatic scale-up animation */
+}
+
+
+/* Keyframes for automatic scaling animation */
+@keyframes scaleUp {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Full-screen animation */
+.full-screen-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(255, 255, 255); /* Placeholder color */
+    background: url("../background/background2.jpg") no-repeat center center fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.8s ease-in-out;
+    z-index: 1000;
+    background-size: cover;
+}
+
+.full-screen-container.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.full-screen-container img {
+    max-width: 100%;
+    max-height: 100%;
+    animation: fullScreenImageAnimation 1s ease-in-out;
+}
+
+@keyframes fullScreenImageAnimation {
+    0% {
+        transform: scale(0.5);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+        

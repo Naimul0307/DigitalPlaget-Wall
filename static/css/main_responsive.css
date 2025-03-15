@@ -1,0 +1,12 @@
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            #doodleDisplay img {
+                width: calc(100% / 2 - 40px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            #doodleDisplay img {
+                width: 100%;
+            }
+        }

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/setting.css">
+    <link rel="shortcut icon" href="/static/background/favicon.ico" type="image/x-icon">
+    <title>Settings Page</title>
+</head>
+<body>
+    <div class="settings-container">
+        <h1>Settings</h1>
+        <form id="settings-form">
+            <input type="text" id="background_image" name="background_image" readonly hidden>
+            <input type="text" id="doodle_image" name="doodle_image" readonly hidden>
+
+            <label for="image_width">Image Width:</label>
+            <input type="text" id="image_width" name="image_width">
+
+            <label for="image_margin">Image Margin:</label>
+            <input type="text" id="image_margin" name="image_margin">
+
+            <label for="max_images">Max Images:</label>
+            <input type="number" id="max_images" name="max_images" min="1">
+
+            <button type="submit">Save Settings</button>
+        </form>
+        <a href="/main">Go to Main Page</a> <!-- Link to settings page -->
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch('/get_current_settings')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('background_image').value = data.background_image;
+                    document.getElementById('doodle_image').value = data.doodle_image;
+                    document.getElementById('image_width').value = data.image_width;
+                    document.getElementById('image_margin').value = data.image_margin;
+                    document.getElementById('max_images').value = data.max_images;
+                });
+
+            document.getElementById('settings-form').addEventListener('submit', function(event) {
+                event.preventDefault();
+                const formData = new FormData(this);
+                fetch('/update_settings', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Settings updated successfully!');
+                    } else {
+                        alert('Error updating settings.');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

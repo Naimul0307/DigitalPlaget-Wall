@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="apple-mobile-web-app-capable" content="yes"> <!-- Enable full-screen on home screen -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="hidden"> <!-- Hide status bar -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Digital Doodles</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/styles.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css">
+    <link rel="shortcut icon" href="/static/background/favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <div class="section">
+        <div class="canvas-container">
+            <canvas id="doodleCanvas"></canvas>
+        </div>
+    
+        <div class="toolbar">
+            <button class="btn btn-primary mr-2 btn-float" onclick="clearCanvas()">Clear</button>
+            <button class="btn btn-success mr-2 btn-float" onclick="addText()">Add Text</button>
+            <button class="btn btn-danger mr-2 btn-float" onclick="saveDoodle()">Submit</button>
+            <button class="btn btn-warning mr-2 btn-float" onclick="enableFullScreen()">Go Fullscreen</button>
+        </div>    
+    </div>
+
+    <script>
+        // Function to request full-screen mode
+        function enableFullScreen() {
+            const elem = document.documentElement;
+
+            // Request full-screen based on browser support
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.mozRequestFullScreen) { // Firefox
+                elem.mozRequestFullScreen();
+            } else if (elem.webkitRequestFullscreen) { // Chrome, Safari and Opera
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { // IE/Edge
+                elem.msRequestFullscreen();
+            }
+
+            // Lock the screen orientation to portrait
+            lockOrientation();
+        }
+
+        // Function to lock the screen orientation
+        function lockOrientation() {
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('portrait').then(() => {
+                    console.log("Orientation locked to portrait.");
+                }).catch((err) => {
+                    console.error("Failed to lock orientation: ", err);
+                });
+            } else {
+                console.log("Screen Orientation API is not supported.");
+            }
+        }
+
+        // Exit full-screen mode when user presses ESC key or navigates away
+        document.addEventListener("fullscreenchange", function () {
+            if (!document.fullscreenElement) {
+                console.log("Exited full-screen mode.");
+                // Lock orientation back to portrait if possible
+                lockOrientation();
+            }
+        });
+
+        // Detect mobile device to provide an alert about screen locking and full-screen mode
+        function isMobile() {
+            return /Mobi|Android/i.test(navigator.userAgent);
+        }
+
+        // Run the function on page load or button click
+        window.onload = function () {
+            if (isMobile()) {
+                alert("This experience is best viewed in full-screen portrait mode.");
+            }
+        };
+    </script>
+
+    <script src="/static/js/socket.io.min.js"></script>
+    <script src="/static/js/home.js"></script>
+    <script src="/static/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
