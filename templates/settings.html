@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -23,6 +23,16 @@
             <label for="max_images">Max Images:</label>
             <input type="number" id="max_images" name="max_images" min="1" placeholder="20">
 
+            <!-- New fields for image resizing and quality -->
+            <label for="resize_width">Resize Width:</label>
+            <input type="number" id="resize_width" name="resize_width" placeholder="720">
+
+            <label for="resize_height">Resize Height:</label>
+            <input type="number" id="resize_height" name="resize_height" placeholder="720">
+
+            <label for="image_quality">Image Quality (0-100):</label>
+            <input type="number" id="image_quality" name="image_quality" min="0" max="100" placeholder="100">
+
             <button type="submit">Save Settings</button>
         </form>
         <a href="/main">Go to Main Page</a> <!-- Link to settings page -->
@@ -38,6 +48,11 @@
                     document.getElementById('image_width').value = data.image_width;
                     document.getElementById('image_margin').value = data.image_margin;
                     document.getElementById('max_images').value = data.max_images;
+
+                    // Populate the new fields for resizing and quality
+                    document.getElementById('resize_width').value = data.resize_width || 720;
+                    document.getElementById('resize_height').value = data.resize_height || 720;
+                    document.getElementById('image_quality').value = data.image_quality || 100;
                 });
 
             document.getElementById('settings-form').addEventListener('submit', function(event) {

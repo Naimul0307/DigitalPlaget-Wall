@@ -146,10 +146,24 @@ app.post("/update_settings", upload.single("bg_image_upload"), async (req, res) 
     }
 });
 
+let resizeWidth = 720;  // Default resize width
+let resizeHeight = 720; // Default resize height
+let imageQuality = 100; // Default image quality
+
+// Update settings from the frontend
 io.on("connection", (socket) => {
     console.log("A user connected");
 
-    socket.on("submit_doodle", async(data) => {
+    // Listen for settings update from the client
+    socket.on('update_image_settings', (settings) => {
+        resizeWidth = settings.resize_width || resizeWidth;
+        resizeHeight = settings.resize_height || resizeHeight;
+        imageQuality = settings.image_quality || imageQuality;
+
+        console.log('Updated image settings:', { resizeWidth, resizeHeight, imageQuality });
+    });
+
+    socket.on("submit_doodle", async (data) => {
         const base64Data = data.image.replace(/^data:image\/png;base64,/, "");
         const fileName = `doodle_${Date.now()}.png`;
         const filePath = path.join(doodleFolder, fileName);
@@ -157,7 +171,8 @@ io.on("connection", (socket) => {
 
         Jimp.read(buffer)
             .then(image => {
-                return image.resize(720, 720).quality(100).writeAsync(filePath);
+                // Apply dynamic resize and quality settings
+                return image.resize(resizeWidth, resizeHeight).quality(imageQuality).writeAsync(filePath);
             })
             .then(() => {
                 console.log("Doodle saved:", filePath);
@@ -174,6 +189,32 @@ io.on("connection", (socket) => {
                 socket.emit("save_error", { message: "Failed to save doodle." });
             });
     });
+});
+
+// Handling settings update request from the client (to save to configuration file)
+app.post("/update_settings", upload.single("bg_image_upload"), async (req, res) => {
+    try {
+        const { image_width, image_margin, max_images, resize_width, resize_height, image_quality } = req.body;
+
+        // Update CSS and JS files (existing logic) ...
+
+        // Save new image settings to the config
+        resizeWidth = resize_width || resizeWidth;
+        resizeHeight = resize_height || resizeHeight;
+        imageQuality = image_quality || imageQuality;
+
+        // Optionally, you can save these values to the config file if you want to persist them
+        const config = loadConfig();
+        config.resizeWidth = resizeWidth;
+        config.resizeHeight = resizeHeight;
+        config.imageQuality = imageQuality;
+        fs.writeFileSync(configPath, JSON.stringify(config, null, 4));
+
+        res.send("Settings updated successfully!");
+    } catch (err) {
+        console.error("Error updating settings:", err);
+        res.status(500).send("Error updating settings.");
+    }
 });
 
 fs.readdir(doodleFolder, (err, files) => {
