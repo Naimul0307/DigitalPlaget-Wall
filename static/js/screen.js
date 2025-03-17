@@ -17,9 +17,13 @@ window.onload = function() {
 
     socket.on('new_doodle', function(data) {
         console.log('New doodle received:', data);
-        queueFullScreenImage(data.image); // Queue new doodle for full-screen display
+        if (!data.image) {
+            console.error("Received invalid doodle:", data);
+            return;
+        }
+        queueFullScreenImage(data.image); 
     });
-
+    
     function fetchAndDisplayDoodles() {
         fetch('/get_latest_doodles')
             .then(response => {
