@@ -70,31 +70,104 @@ app.get("/get_latest_doodles", (req, res) => {
 // Handle file uploads
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
+// app.get("/get_current_settings", (req, res) => {
+//     try {
+//         const cssFilePath = path.join(staticFolder, "css", "main.css");
+//         const jsFilePath = path.join(staticFolder, "js", "screen.js");
+
+//         let cssContent = fs.readFileSync(cssFilePath, "utf8");
+//         let jsContent = fs.readFileSync(jsFilePath, "utf8");
+
+//         // Extract image width & margin from CSS
+//         const widthMatch = cssContent.match(/#doodleDisplay img\s*{[^}]*?width:\s*([^;]+);/);
+//         const marginMatch = cssContent.match(/#doodleDisplay img\s*{[^}]*?margin:\s*([^;]+);/);
+
+//         const imageWidth = widthMatch ? widthMatch[1] : "";
+//         const imageMargin = marginMatch ? marginMatch[1] : "";
+
+//         // Extract maxImages from JS
+//         const maxImagesMatch = jsContent.match(/const maxImages\s*=\s*parseInt\(document\.body\.dataset\.maxImages,\s*(\d+)\)/);
+//         const maxImages = maxImagesMatch ? maxImagesMatch[1] : "18";
+
+//         res.json({
+//             background_image: "/static/background/background_image.png",
+//             doodle_image: "/static/doodles/doodle.png",
+//             image_width: imageWidth,
+//             image_margin: imageMargin,
+//             max_images: maxImages
+//         });
+//     } catch (err) {
+//         console.error("Error fetching current settings:", err);
+//         res.status(500).json({ error: "Failed to load settings." });
+//     }
+// });
+
+// // 📌 UPDATE Settings
+// app.post("/update_settings", upload.single("bg_image_upload"), async (req, res) => {
+//     try {
+//         const { image_width, image_margin, max_images } = req.body;
+
+//         const cssFilePath = path.join(staticFolder, "css", "main.css");
+//         const jsFilePath = path.join(staticFolder, "js", "screen.js");
+
+//         // Handle background image upload
+//         if (req.file) {
+//             const bgImagePath = path.join(staticFolder, "background", "background_image.png");
+//             fs.writeFileSync(bgImagePath, req.file.buffer);
+
+//             // Update CSS with new background image path
+//             let cssContent = fs.readFileSync(cssFilePath, "utf8");
+//             cssContent = cssContent.replace(/url\("\/static\/background\/[^"]*"\)/, `url("/static/background/background_image.png")`);
+//             fs.writeFileSync(cssFilePath, cssContent);
+//         }
+
+//         // Update CSS (Image width & margin)
+//         let cssContent = fs.readFileSync(cssFilePath, "utf8");
+//         if (image_width) {
+//             cssContent = cssContent.replace(/(#doodleDisplay img\s*{[^}]*?width:\s*)[^;]+(;)/, `$1${image_width}$2`);
+//         }
+//         if (image_margin) {
+//             cssContent = cssContent.replace(/(#doodleDisplay img\s*{[^}]*?margin:\s*)[^;]+(;)/, `$1${image_margin}$2`);
+//         }
+//         fs.writeFileSync(cssFilePath, cssContent);
+
+//         // Update JS (maxImages value)
+//         let jsContent = fs.readFileSync(jsFilePath, "utf8");
+//         jsContent = jsContent.replace(
+//             /const maxImages\s*=\s*parseInt\(document\.body\.dataset\.maxImages,\s*\d+\)\s*\|\|\s*\d+;/,
+//             `const maxImages = parseInt(document.body.dataset.maxImages, ${max_images}) || ${max_images};`
+//         );
+//         fs.writeFileSync(jsFilePath, jsContent);
+
+//         res.send("Settings updated successfully!");
+//     } catch (err) {
+//         console.error("Error updating settings:", err);
+//         res.status(500).send("Error updating settings.");
+//     }
+// });
+
 app.get("/get_current_settings", (req, res) => {
     try {
         const cssFilePath = path.join(staticFolder, "css", "main.css");
         const jsFilePath = path.join(staticFolder, "js", "screen.js");
+        const config = loadConfig();
 
         let cssContent = fs.readFileSync(cssFilePath, "utf8");
         let jsContent = fs.readFileSync(jsFilePath, "utf8");
 
-        // Extract image width & margin from CSS
         const widthMatch = cssContent.match(/#doodleDisplay img\s*{[^}]*?width:\s*([^;]+);/);
         const marginMatch = cssContent.match(/#doodleDisplay img\s*{[^}]*?margin:\s*([^;]+);/);
-
-        const imageWidth = widthMatch ? widthMatch[1] : "";
-        const imageMargin = marginMatch ? marginMatch[1] : "";
-
-        // Extract maxImages from JS
         const maxImagesMatch = jsContent.match(/const maxImages\s*=\s*parseInt\(document\.body\.dataset\.maxImages,\s*(\d+)\)/);
-        const maxImages = maxImagesMatch ? maxImagesMatch[1] : "18";
 
         res.json({
             background_image: "/static/background/background_image.png",
             doodle_image: "/static/doodles/doodle.png",
-            image_width: imageWidth,
-            image_margin: imageMargin,
-            max_images: maxImages
+            image_width: widthMatch ? widthMatch[1] : "",
+            image_margin: marginMatch ? marginMatch[1] : "",
+            max_images: maxImagesMatch ? maxImagesMatch[1] : "18",
+            resize_width: config.resize_width || 720,
+            resize_height: config.resize_height || 720,
+            image_quality: config.image_quality || 100
         });
     } catch (err) {
         console.error("Error fetching current settings:", err);
@@ -102,42 +175,40 @@ app.get("/get_current_settings", (req, res) => {
     }
 });
 
-// 📌 UPDATE Settings
 app.post("/update_settings", upload.single("bg_image_upload"), async (req, res) => {
     try {
-        const { image_width, image_margin, max_images } = req.body;
+        const { image_width, image_margin, max_images, resize_width, resize_height, image_quality } = req.body;
 
         const cssFilePath = path.join(staticFolder, "css", "main.css");
         const jsFilePath = path.join(staticFolder, "js", "screen.js");
+        const config = loadConfig();
 
-        // Handle background image upload
         if (req.file) {
             const bgImagePath = path.join(staticFolder, "background", "background_image.png");
             fs.writeFileSync(bgImagePath, req.file.buffer);
 
-            // Update CSS with new background image path
             let cssContent = fs.readFileSync(cssFilePath, "utf8");
             cssContent = cssContent.replace(/url\("\/static\/background\/[^"]*"\)/, `url("/static/background/background_image.png")`);
             fs.writeFileSync(cssFilePath, cssContent);
         }
 
-        // Update CSS (Image width & margin)
         let cssContent = fs.readFileSync(cssFilePath, "utf8");
-        if (image_width) {
-            cssContent = cssContent.replace(/(#doodleDisplay img\s*{[^}]*?width:\s*)[^;]+(;)/, `$1${image_width}$2`);
-        }
-        if (image_margin) {
-            cssContent = cssContent.replace(/(#doodleDisplay img\s*{[^}]*?margin:\s*)[^;]+(;)/, `$1${image_margin}$2`);
-        }
+        if (image_width) cssContent = cssContent.replace(/(#doodleDisplay img\s*{[^}]*?width:\s*)[^;]+(;)/, `$1${image_width}$2`);
+        if (image_margin) cssContent = cssContent.replace(/(#doodleDisplay img\s*{[^}]*?margin:\s*)[^;]+(;)/, `$1${image_margin}$2`);
         fs.writeFileSync(cssFilePath, cssContent);
 
-        // Update JS (maxImages value)
         let jsContent = fs.readFileSync(jsFilePath, "utf8");
         jsContent = jsContent.replace(
             /const maxImages\s*=\s*parseInt\(document\.body\.dataset\.maxImages,\s*\d+\)\s*\|\|\s*\d+;/,
             `const maxImages = parseInt(document.body.dataset.maxImages, ${max_images}) || ${max_images};`
         );
         fs.writeFileSync(jsFilePath, jsContent);
+
+        // ✅ Save Doodle Settings in config.json
+        config.resize_width = parseInt(resize_width) || 720;
+        config.resize_height = parseInt(resize_height) || 720;
+        config.image_quality = parseInt(image_quality) || 100;
+        fs.writeFileSync(configPath, JSON.stringify(config, null, 4));
 
         res.send("Settings updated successfully!");
     } catch (err) {
@@ -146,35 +217,23 @@ app.post("/update_settings", upload.single("bg_image_upload"), async (req, res) 
     }
 });
 
-let resizeWidth = 720;  // Default resize width
-let resizeHeight = 720; // Default resize height
-let imageQuality = 100; // Default image quality
 
-// Update settings from the frontend
 io.on("connection", (socket) => {
     console.log("A user connected");
 
-    // Listen for settings update from the client
-    socket.on('update_image_settings', (settings) => {
-        resizeWidth = settings.resize_width || resizeWidth;
-        resizeHeight = settings.resize_height || resizeHeight;
-        imageQuality = settings.image_quality || imageQuality;
-
-        console.log('Updated image settings:', { resizeWidth, resizeHeight, imageQuality });
-    });
-
-    socket.on("submit_doodle", async (data) => {
+    socket.on("submit_doodle", async(data) => {
         const base64Data = data.image.replace(/^data:image\/png;base64,/, "");
         const fileName = `doodle_${Date.now()}.png`;
         const filePath = path.join(doodleFolder, fileName);
         const buffer = Buffer.from(base64Data, "base64");
 
         Jimp.read(buffer)
-            .then(image => {
-                // Apply dynamic resize and quality settings
-                return image.resize(resizeWidth, resizeHeight).quality(imageQuality).writeAsync(filePath);
-            })
-            .then(() => {
+        .then(image => {
+            const config = loadConfig(); // Load latest settings
+            return image.resize(config.resize_width, config.resize_height)
+                        .quality(config.image_quality)
+                        .writeAsync(filePath);
+        }).then(() => {
                 console.log("Doodle saved:", filePath);
                 const publicPath = `/static/doodles/${fileName}`;
                 doodleFiles.unshift(publicPath);
@@ -189,32 +248,6 @@ io.on("connection", (socket) => {
                 socket.emit("save_error", { message: "Failed to save doodle." });
             });
     });
-});
-
-// Handling settings update request from the client (to save to configuration file)
-app.post("/update_settings", upload.single("bg_image_upload"), async (req, res) => {
-    try {
-        const { image_width, image_margin, max_images, resize_width, resize_height, image_quality } = req.body;
-
-        // Update CSS and JS files (existing logic) ...
-
-        // Save new image settings to the config
-        resizeWidth = resize_width || resizeWidth;
-        resizeHeight = resize_height || resizeHeight;
-        imageQuality = image_quality || imageQuality;
-
-        // Optionally, you can save these values to the config file if you want to persist them
-        const config = loadConfig();
-        config.resizeWidth = resizeWidth;
-        config.resizeHeight = resizeHeight;
-        config.imageQuality = imageQuality;
-        fs.writeFileSync(configPath, JSON.stringify(config, null, 4));
-
-        res.send("Settings updated successfully!");
-    } catch (err) {
-        console.error("Error updating settings:", err);
-        res.status(500).send("Error updating settings.");
-    }
 });
 
 fs.readdir(doodleFolder, (err, files) => {

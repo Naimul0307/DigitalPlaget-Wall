@@ -46,9 +46,9 @@ h1{
 }
 
 #doodleDisplay img {
-    width: calc(100% / 6 - 30px);
+    width: calc(100% / 6 - 20px);
     height: auto;
-    margin: 20px;
+    margin: 10px;
     cursor: pointer;
     transition: transform 0.8s ease-in-out;
     transform: translateY(20px);

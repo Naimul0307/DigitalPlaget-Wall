@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -23,19 +23,85 @@
             <label for="max_images">Max Images:</label>
             <input type="number" id="max_images" name="max_images" min="1" placeholder="20">
 
-            <!-- New fields for image resizing and quality -->
-            <label for="resize_width">Resize Width:</label>
-            <input type="number" id="resize_width" name="resize_width" placeholder="720">
+            <button type="submit">Save Settings</button>
+        </form>
+        <a href="/main">Go to Main Page</a>
+        <a href="/index">Go to Index Page</a>
+    </div>
 
-            <label for="resize_height">Resize Height:</label>
-            <input type="number" id="resize_height" name="resize_height" placeholder="720">
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch('/get_current_settings')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('background_image').value = data.background_image;
+                    document.getElementById('doodle_image').value = data.doodle_image;
+                    document.getElementById('image_width').value = data.image_width;
+                    document.getElementById('image_margin').value = data.image_margin;
+                    document.getElementById('max_images').value = data.max_images;
+                });
 
-            <label for="image_quality">Image Quality (0-100):</label>
-            <input type="number" id="image_quality" name="image_quality" min="0" max="100" placeholder="100">
+            document.getElementById('settings-form').addEventListener('submit', function(event) {
+                event.preventDefault();
+                const formData = new FormData(this);
+                fetch('/update_settings', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Settings updated successfully!');
+                    } else {
+                        alert('Error updating settings.');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/setting.css">
+    <link rel="shortcut icon" href="/static/background/favicon.ico" type="image/x-icon">
+    <title>Settings Page</title>
+</head>
+<body>
+    <div class="settings-container">
+        <h1>Settings</h1>
+        <form id="settings-form">
+            <input type="text" id="background_image" name="background_image" readonly hidden>
+            <input type="text" id="doodle_image" name="doodle_image" readonly hidden>
+
+            <label for="image_width">Image Width:</label>
+            <input type="text" id="image_width" name="image_width" placeholder="calc(100% / 6 - 30px)">
+
+            <label for="image_margin">Image Margin:</label>
+            <input type="text" id="image_margin" name="image_margin" placeholder="20px">
+
+            <label for="max_images">Max Images:</label>
+            <input type="number" id="max_images" name="max_images" min="1" placeholder="20">
+
+            <hr> <!-- Separator for new doodle settings -->
+
+            <label for="resize_width">Doodle Resize Width:</label>
+            <input type="number" id="resize_width" name="resize_width" min="100" placeholder="720">
+
+            <label for="resize_height">Doodle Resize Height:</label>
+            <input type="number" id="resize_height" name="resize_height" min="100" placeholder="720">
+
+            <label for="image_quality">Doodle Quality (1-100):</label>
+            <input type="number" id="image_quality" name="image_quality" min="1" max="100" placeholder="100">
 
             <button type="submit">Save Settings</button>
         </form>
-        <a href="/main">Go to Main Page</a> <!-- Link to settings page -->
+        <a href="/main">Go to Main Page</a>
+        <a href="/index">Go to Index Page</a>
     </div>
 
     <script>
@@ -49,10 +115,10 @@
                     document.getElementById('image_margin').value = data.image_margin;
                     document.getElementById('max_images').value = data.max_images;
 
-                    // Populate the new fields for resizing and quality
-                    document.getElementById('resize_width').value = data.resize_width || 720;
-                    document.getElementById('resize_height').value = data.resize_height || 720;
-                    document.getElementById('image_quality').value = data.image_quality || 100;
+                    // Load doodle settings
+                    document.getElementById('resize_width').value = data.resize_width;
+                    document.getElementById('resize_height').value = data.resize_height;
+                    document.getElementById('image_quality').value = data.image_quality;
                 });
 
             document.getElementById('settings-form').addEventListener('submit', function(event) {

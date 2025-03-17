@@ -1,0 +1,18 @@
+DigitalPlaget-Wall
+├── static/
+│   ├── background/
+│   ├── css/
+│   │    └──styles.css
+│   ├── js/
+│   │    ├──home.js
+│   │    └──screen.js
+│   └── doodles/
+│
+├── templates/
+│   ├── settings.html
+│   ├── index.html
+│   └──  main_screen.html
+│ 
+├── app.js 
+├── package-lock.json
+└── package.json
