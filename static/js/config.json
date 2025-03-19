@@ -1,7 +1,7 @@
 {
     "IP": "192.168.0.155",
-    "PORT": 5003,
-    "resize_width": 800,
-    "resize_height": 800,
+    "PORT": 32872,
+    "resize_width": 720,
+    "resize_height": 720,
     "image_quality": 100
 }

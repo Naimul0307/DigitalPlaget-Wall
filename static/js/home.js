@@ -64,7 +64,10 @@ function handleTouchEnd(event) {
     if (isTyping) {
         createInputField(event.changedTouches[0]);
     }
+    // Prevent further touch events that could interfere
+    event.preventDefault();
 }
+
 
 function handleTouchMove(event) {
     event.preventDefault();
@@ -153,9 +156,12 @@ function createInputField(event) {
     inputField.style.width = `${inputWidth}px`;  // Set the input field width
     inputField.style.height = `${inputHeight}px`;  // Set the input field height
     inputField.style.fontSize = '50px';  // Adjust the font size as needed
+    inputField.style.zIndex = 1000; // Ensure it's above the canvas
 
     // Add the input field to the canvas container
     document.querySelector('.canvas-container').appendChild(inputField);
+
+    // Focus on the input field
     inputField.focus();
 
     inputField.addEventListener('keydown', (e) => {

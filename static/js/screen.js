@@ -69,7 +69,7 @@ window.onload = function() {
         observeSingleImage(img);
 
         // Remove excess images if exceeding maxImages
-        const maxImages = parseInt(document.body.dataset.maxImages, 10) || 10;
+        const maxImages = parseInt(document.body.dataset.maxImages, 16) || 16;
         while (doodleDisplay.children.length > maxImages) {
             doodleDisplay.removeChild(doodleDisplay.lastChild);
         }
