@@ -45,7 +45,7 @@ const getIPAddress = () => {
 };
 
 const currentIP = getIPAddress();
-const PORT = process.env.PORT || 5003;
+const PORT = Math.floor(Math.random() * (65535 - 1024) + 1024);
 const config = loadConfig();
 config.IP = currentIP;
 config.PORT = PORT;
@@ -70,82 +70,6 @@ app.get("/get_latest_doodles", (req, res) => {
 // Handle file uploads
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
-// app.get("/get_current_settings", (req, res) => {
-//     try {
-//         const cssFilePath = path.join(staticFolder, "css", "main.css");
-//         const jsFilePath = path.join(staticFolder, "js", "screen.js");
-
-//         let cssContent = fs.readFileSync(cssFilePath, "utf8");
-//         let jsContent = fs.readFileSync(jsFilePath, "utf8");
-
-//         // Extract image width & margin from CSS
-//         const widthMatch = cssContent.match(/#doodleDisplay img\s*{[^}]*?width:\s*([^;]+);/);
-//         const marginMatch = cssContent.match(/#doodleDisplay img\s*{[^}]*?margin:\s*([^;]+);/);
-
-//         const imageWidth = widthMatch ? widthMatch[1] : "";
-//         const imageMargin = marginMatch ? marginMatch[1] : "";
-
-//         // Extract maxImages from JS
-//         const maxImagesMatch = jsContent.match(/const maxImages\s*=\s*parseInt\(document\.body\.dataset\.maxImages,\s*(\d+)\)/);
-//         const maxImages = maxImagesMatch ? maxImagesMatch[1] : "18";
-
-//         res.json({
-//             background_image: "/static/background/background_image.png",
-//             doodle_image: "/static/doodles/doodle.png",
-//             image_width: imageWidth,
-//             image_margin: imageMargin,
-//             max_images: maxImages
-//         });
-//     } catch (err) {
-//         console.error("Error fetching current settings:", err);
-//         res.status(500).json({ error: "Failed to load settings." });
-//     }
-// });
-
-// // 📌 UPDATE Settings
-// app.post("/update_settings", upload.single("bg_image_upload"), async (req, res) => {
-//     try {
-//         const { image_width, image_margin, max_images } = req.body;
-
-//         const cssFilePath = path.join(staticFolder, "css", "main.css");
-//         const jsFilePath = path.join(staticFolder, "js", "screen.js");
-
-//         // Handle background image upload
-//         if (req.file) {
-//             const bgImagePath = path.join(staticFolder, "background", "background_image.png");
-//             fs.writeFileSync(bgImagePath, req.file.buffer);
-
-//             // Update CSS with new background image path
-//             let cssContent = fs.readFileSync(cssFilePath, "utf8");
-//             cssContent = cssContent.replace(/url\("\/static\/background\/[^"]*"\)/, `url("/static/background/background_image.png")`);
-//             fs.writeFileSync(cssFilePath, cssContent);
-//         }
-
-//         // Update CSS (Image width & margin)
-//         let cssContent = fs.readFileSync(cssFilePath, "utf8");
-//         if (image_width) {
-//             cssContent = cssContent.replace(/(#doodleDisplay img\s*{[^}]*?width:\s*)[^;]+(;)/, `$1${image_width}$2`);
-//         }
-//         if (image_margin) {
-//             cssContent = cssContent.replace(/(#doodleDisplay img\s*{[^}]*?margin:\s*)[^;]+(;)/, `$1${image_margin}$2`);
-//         }
-//         fs.writeFileSync(cssFilePath, cssContent);
-
-//         // Update JS (maxImages value)
-//         let jsContent = fs.readFileSync(jsFilePath, "utf8");
-//         jsContent = jsContent.replace(
-//             /const maxImages\s*=\s*parseInt\(document\.body\.dataset\.maxImages,\s*\d+\)\s*\|\|\s*\d+;/,
-//             `const maxImages = parseInt(document.body.dataset.maxImages, ${max_images}) || ${max_images};`
-//         );
-//         fs.writeFileSync(jsFilePath, jsContent);
-
-//         res.send("Settings updated successfully!");
-//     } catch (err) {
-//         console.error("Error updating settings:", err);
-//         res.status(500).send("Error updating settings.");
-//     }
-// });
-
 app.get("/get_current_settings", (req, res) => {
     try {
         const cssFilePath = path.join(staticFolder, "css", "main.css");
@@ -262,8 +186,11 @@ fs.readdir(doodleFolder, (err, files) => {
     }
 });
 
+app.get("/get_server_info", (req, res) => {
+    res.json({ IP: currentIP, PORT: PORT });
+});
 
 // Start server
-server.listen(PORT, currentIP, () => {
+server.listen(PORT, () => {
     console.log(`Server running at http://${currentIP}:${PORT}/`);
 });

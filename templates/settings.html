@@ -1,67 +1,3 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/css/setting.css">
-    <link rel="shortcut icon" href="/static/background/favicon.ico" type="image/x-icon">
-    <title>Settings Page</title>
-</head>
-<body>
-    <div class="settings-container">
-        <h1>Settings</h1>
-        <form id="settings-form">
-            <input type="text" id="background_image" name="background_image" readonly hidden>
-            <input type="text" id="doodle_image" name="doodle_image" readonly hidden>
-
-            <label for="image_width">Image Width:</label>
-            <input type="text" id="image_width" name="image_width" placeholder="calc(100% / 6 - 30px)">
-
-            <label for="image_margin">Image Margin:</label>
-            <input type="text" id="image_margin" name="image_margin" placeholder="20px">
-
-            <label for="max_images">Max Images:</label>
-            <input type="number" id="max_images" name="max_images" min="1" placeholder="20">
-
-            <button type="submit">Save Settings</button>
-        </form>
-        <a href="/main">Go to Main Page</a>
-        <a href="/index">Go to Index Page</a>
-    </div>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            fetch('/get_current_settings')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('background_image').value = data.background_image;
-                    document.getElementById('doodle_image').value = data.doodle_image;
-                    document.getElementById('image_width').value = data.image_width;
-                    document.getElementById('image_margin').value = data.image_margin;
-                    document.getElementById('max_images').value = data.max_images;
-                });
-
-            document.getElementById('settings-form').addEventListener('submit', function(event) {
-                event.preventDefault();
-                const formData = new FormData(this);
-                fetch('/update_settings', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => {
-                    if (response.ok) {
-                        alert('Settings updated successfully!');
-                    } else {
-                        alert('Error updating settings.');
-                    }
-                });
-            });
-        });
-    </script>
-</body>
-</html> -->
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -74,6 +10,10 @@
 <body>
     <div class="settings-container">
         <h1>Settings</h1>
+
+        <!-- Display the dynamically generated server URL -->
+        <p><strong>Server URL:</strong> <a id="server-url" href="#" target="_blank">Loading...</a></p>
+
         <form id="settings-form">
             <input type="text" id="background_image" name="background_image" readonly hidden>
             <input type="text" id="doodle_image" name="doodle_image" readonly hidden>
@@ -114,13 +54,25 @@
                     document.getElementById('image_width').value = data.image_width;
                     document.getElementById('image_margin').value = data.image_margin;
                     document.getElementById('max_images').value = data.max_images;
-
-                    // Load doodle settings
                     document.getElementById('resize_width').value = data.resize_width;
                     document.getElementById('resize_height').value = data.resize_height;
                     document.getElementById('image_quality').value = data.image_quality;
-                });
 
+                    // Display server URL
+                    const serverUrl = `http://${data.IP}:${data.PORT}/`;
+                    const urlElement = document.getElementById('server-url');
+                    urlElement.href = serverUrl;
+                    urlElement.textContent = serverUrl;
+                });
+                fetch('/get_server_info')
+        .then(response => response.json())
+        .then(data => {
+            const serverUrl = `http://${data.IP}:${data.PORT}/`;
+            const urlElement = document.getElementById('server-url');
+            urlElement.href = serverUrl;
+            urlElement.textContent = serverUrl;
+        })
+        .catch(error => console.error("Error fetching server info:", error));
             document.getElementById('settings-form').addEventListener('submit', function(event) {
                 event.preventDefault();
                 const formData = new FormData(this);
