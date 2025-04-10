@@ -43,7 +43,6 @@
         <a href="/main">Go to Main Page</a>
         <a href="/index">Go to Index Page</a>
     </div>
-
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             fetch('/get_current_settings')
@@ -57,22 +56,24 @@
                     document.getElementById('resize_width').value = data.resize_width;
                     document.getElementById('resize_height').value = data.resize_height;
                     document.getElementById('image_quality').value = data.image_quality;
+                });
 
-                    // Display server URL
-                    const serverUrl = `http://${data.IP}:${data.PORT}/`;
+            // Ensure Electron IPC is available
+            if (window.electron && window.electron.ipcRenderer) {
+                console.log("Waiting for server URL...");
+
+                window.electron.ipcRenderer.receive('server-url', (data) => {
+                    console.log("Received server URL:", data);
+
+                    const serverUrl = `http://${data.ip}:${data.port}/`;
                     const urlElement = document.getElementById('server-url');
                     urlElement.href = serverUrl;
                     urlElement.textContent = serverUrl;
                 });
-                fetch('/get_server_info')
-        .then(response => response.json())
-        .then(data => {
-            const serverUrl = `http://${data.IP}:${data.PORT}/`;
-            const urlElement = document.getElementById('server-url');
-            urlElement.href = serverUrl;
-            urlElement.textContent = serverUrl;
-        })
-        .catch(error => console.error("Error fetching server info:", error));
+            } else {
+                console.error("Electron IPC not available. Ensure preload.js is loaded correctly.");
+            }
+
             document.getElementById('settings-form').addEventListener('submit', function(event) {
                 event.preventDefault();
                 const formData = new FormData(this);
