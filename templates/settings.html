@@ -19,7 +19,10 @@
             <input type="text" id="doodle_image" name="doodle_image" readonly hidden>
 
             <label for="image_width">Image Width:</label>
-            <input type="text" id="image_width" name="image_width" placeholder="calc(100% / 6 - 30px)">
+            <input type="text" id="image_width" name="image_width" placeholder="calc(100% / 6 - 30px) or 25px">
+
+            <label for="image_height">Image Height:</label>
+            <input type="text" id="image_height" name="image_height" placeholder="250px or auto">
 
             <label for="image_margin">Image Margin:</label>
             <input type="text" id="image_margin" name="image_margin" placeholder="20px">
@@ -44,52 +47,63 @@
         <a href="/index">Go to Index Page</a>
     </div>
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            fetch('/get_current_settings')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('background_image').value = data.background_image;
-                    document.getElementById('doodle_image').value = data.doodle_image;
-                    document.getElementById('image_width').value = data.image_width;
-                    document.getElementById('image_margin').value = data.image_margin;
-                    document.getElementById('max_images').value = data.max_images;
-                    document.getElementById('resize_width').value = data.resize_width;
-                    document.getElementById('resize_height').value = data.resize_height;
-                    document.getElementById('image_quality').value = data.image_quality;
-                });
+    document.addEventListener("DOMContentLoaded", function() {
+        fetch('/get_current_settings')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('background_image').value = data.background_image;
+                document.getElementById('doodle_image').value = data.doodle_image;
+                document.getElementById('image_width').value = data.image_width;
+                document.getElementById('image_height').value = data.image_height;
+                document.getElementById('image_margin').value = data.image_margin;
+                document.getElementById('max_images').value = data.max_images;
+                document.getElementById('resize_width').value = data.resize_width;
+                document.getElementById('resize_height').value = data.resize_height;
+                document.getElementById('image_quality').value = data.image_quality;
+            });
 
-            // Ensure Electron IPC is available
-            if (window.electron && window.electron.ipcRenderer) {
-                console.log("Waiting for server URL...");
+        // Ensure Electron IPC is available
+        if (window.electron && window.electron.ipcRenderer) {
+            console.log("Waiting for server URL...");
 
-                window.electron.ipcRenderer.receive('server-url', (data) => {
-                    console.log("Received server URL:", data);
+            window.electron.ipcRenderer.receive('server-url', (data) => {
+                console.log("Received server URL:", data);
 
-                    const serverUrl = `http://${data.ip}:${data.port}/`;
-                    const urlElement = document.getElementById('server-url');
-                    urlElement.href = serverUrl;
-                    urlElement.textContent = serverUrl;
-                });
-            } else {
-                console.error("Electron IPC not available. Ensure preload.js is loaded correctly.");
+                const serverUrl = `http://${data.ip}:${data.port}/`;
+                const urlElement = document.getElementById('server-url');
+                urlElement.href = serverUrl;
+                urlElement.textContent = serverUrl;
+            });
+        } else {
+            console.error("Electron IPC not available. Ensure preload.js is loaded correctly.");
+        }
+
+        document.getElementById('settings-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+
+            // Dynamically check for image_height input
+            let imageHeight = formData.get('image_height');
+            if (!imageHeight || imageHeight === "0" || imageHeight === "0px") {
+                // Set image_height to "auto" if no value is entered or 0 is entered
+                imageHeight = 'auto';
+                formData.set('image_height', imageHeight);
             }
 
-            document.getElementById('settings-form').addEventListener('submit', function(event) {
-                event.preventDefault();
-                const formData = new FormData(this);
-                fetch('/update_settings', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => {
-                    if (response.ok) {
-                        alert('Settings updated successfully!');
-                    } else {
-                        alert('Error updating settings.');
-                    }
-                });
+            fetch('/update_settings', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Settings updated successfully!');
+                } else {
+                    alert('Error updating settings.');
+                }
             });
         });
+    });
+
     </script>
 </body>
 </html>

@@ -47,54 +47,102 @@ window.onload = function () {
         }
         return array;
     }
-
+    
     function addNewDoodle(imageSrc) {
-        const cellSize = 250 + 30;
-        const maxAttempts = 30;
-      
         const img = new Image();
         img.src = imageSrc;
         img.alt = 'Doodle';
-      
-        // Set class and animation using runtime delay
+        img.style.animation = `floatOutTop 12s linear infinite`;
+    
+        // Sync animation delay with current time
         const now = Date.now();
         const loopDuration = 8000;
         const offset = (now % loopDuration) / 1000;
-        img.style.animation = `floatOutTop 12s linear infinite`;
         img.style.animationDelay = `-${offset}s`;
         img.style.position = 'absolute';
-      
-        let randomX, randomY, attempts = 0;
-        let placed = false;
-      
-        while (attempts < maxAttempts && !placed) {
-            randomX = Math.floor(Math.random() * (window.innerWidth - cellSize));
-            randomY = Math.floor(Math.random() * (window.innerHeight - cellSize));
-            const overlap = Array.from(doodleDisplay.children).some(existingImg => {
-                const exX = parseInt(existingImg.style.left || 0);
-                const exY = parseInt(existingImg.style.top || 0);
-                return (
-                    Math.abs(randomX - exX) < cellSize &&
-                    Math.abs(randomY - exY) < cellSize
-                );
-            });
-      
-            if (!overlap) placed = true;
-            attempts++;
+    
+        // Temporarily add to compute width & margin
+        img.style.visibility = 'hidden';
+        document.body.appendChild(img);
+        const style = getComputedStyle(img);
+        const width = parseInt(style.width, 10);
+        const margin = parseInt(style.margin, 10);
+        const cellSize = width + (margin * 2);
+        document.body.removeChild(img);
+    
+        // === Use available grid positions ===
+        if (availablePositions.length === 0) {
+            availablePositions = shuffle(getAvailablePositions());
         }
-      
-        img.style.left = `${randomX}px`;
-        img.style.top = `${randomY}px`;
-      
+        const position = availablePositions.pop(); // get one available slot
+    
+        img.style.left = `${position.x + margin}px`;
+        img.style.top = `${position.y + margin}px`;
+        img.style.visibility = 'visible';
+    
         doodleDisplay.insertBefore(img, doodleDisplay.firstChild);
         observeSingleImage(img);
-      
-        const maxImages = parseInt(document.body.dataset.maxImages, 10) || 6 || 6 || 10;
+    
+        const maxImages = parseInt(document.body.dataset.maxImages, 10) || 10 || 10;
         while (doodleDisplay.children.length > maxImages) {
             doodleDisplay.removeChild(doodleDisplay.lastChild);
         }
     }
+    // function addNewDoodle(imageSrc) {
+    //     const maxAttempts = 30;
     
+    //     const img = new Image();
+    //     img.src = imageSrc;
+    //     img.alt = 'Doodle';
+    //     img.style.animation = `floatOutTop 12s linear infinite`;
+    
+    //     // Sync animation delay with current time
+    //     const now = Date.now();
+    //     const loopDuration = 8000;
+    //     const offset = (now % loopDuration) / 1000;
+    //     img.style.animationDelay = `-${offset}s`;
+    //     img.style.position = 'absolute';
+    
+    //     // Temporarily add to DOM to compute CSS
+    //     img.style.visibility = 'hidden';
+    //     document.body.appendChild(img);
+    //     const style = getComputedStyle(img);
+    //     const width = parseInt(style.width, 10);
+    //     const margin = parseInt(style.margin, 10);
+    //     const cellSize = width + (margin * 2);
+    //     document.body.removeChild(img); // clean up
+    
+    //     let randomX, randomY, attempts = 0;
+    //     let placed = false;
+    
+    //     while (attempts < maxAttempts && !placed) {
+    //         randomX = Math.floor(Math.random() * (window.innerWidth - cellSize));
+    //         randomY = Math.floor(Math.random() * (window.innerHeight - cellSize));
+    //         const overlap = Array.from(doodleDisplay.children).some(existingImg => {
+    //             const exX = parseInt(existingImg.style.left || 0);
+    //             const exY = parseInt(existingImg.style.top || 0);
+    //             return (
+    //                 Math.abs(randomX - exX) < cellSize &&
+    //                 Math.abs(randomY - exY) < cellSize
+    //             );
+    //         });
+    
+    //         if (!overlap) placed = true;
+    //         attempts++;
+    //     }
+    
+    //     img.style.left = `${randomX}px`;
+    //     img.style.top = `${randomY}px`;
+    //     img.style.visibility = 'visible';
+    
+    //     doodleDisplay.insertBefore(img, doodleDisplay.firstChild);
+    //     observeSingleImage(img);
+    
+    //     const maxImages = parseInt(document.body.dataset.maxImages, 10);
+    //     while (doodleDisplay.children.length > maxImages) {
+    //         doodleDisplay.removeChild(doodleDisplay.lastChild);
+    //     }
+    // }
     
     function observeSingleImage(img) {
         const observer = new IntersectionObserver(entries => {
