@@ -61,33 +61,49 @@ window.onload = function () {
         img.style.animationDelay = `-${offset}s`;
         img.style.position = 'absolute';
     
-        // Temporarily add to compute width & margin
+        // Get computed width & margin for positioning
         img.style.visibility = 'hidden';
         document.body.appendChild(img);
         const style = getComputedStyle(img);
         const width = parseInt(style.width, 10);
         const margin = parseInt(style.margin, 10);
-        const cellSize = width + (margin * 2);
+        const cellSize = width + margin * 2;
         document.body.removeChild(img);
     
-        // === Use available grid positions ===
+        // Refresh available positions
         if (availablePositions.length === 0) {
             availablePositions = shuffle(getAvailablePositions());
-        }
-        const position = availablePositions.pop(); // get one available slot
     
-        img.style.left = `${position.x + margin}px`;
-        img.style.top = `${position.y + margin}px`;
+            // Remove positions that are already used
+            Array.from(doodleDisplay.children).forEach(existingImg => {
+                const exX = parseInt(existingImg.style.left) - margin;
+                const exY = parseInt(existingImg.style.top) - margin;
+                availablePositions = availablePositions.filter(pos => !(pos.x === exX && pos.y === exY));
+            });
+        }
+    
+        // Get max allowed doodles
+        const maxImages = parseInt(document.body.dataset.maxImages, 10) || 10 || 20;
+    
+        // If max reached, remove the oldest image (firstChild)
+        if (doodleDisplay.children.length >= maxImages) {
+            doodleDisplay.removeChild(doodleDisplay.firstChild);
+        }
+    
+        // Get next position (or fallback to 0,0)
+        let pos = availablePositions.pop() || { x: 0, y: 0 };
+    
+        img.style.left = `${pos.x + margin}px`;
+        img.style.top = `${pos.y + margin}px`;
         img.style.visibility = 'visible';
     
-        doodleDisplay.insertBefore(img, doodleDisplay.firstChild);
+        // Add new image on top
+        doodleDisplay.appendChild(img);
         observeSingleImage(img);
-    
-        const maxImages = parseInt(document.body.dataset.maxImages, 10) || 10 || 10;
-        while (doodleDisplay.children.length > maxImages) {
-            doodleDisplay.removeChild(doodleDisplay.lastChild);
-        }
     }
+    
+    
+    
     // function addNewDoodle(imageSrc) {
     //     const maxAttempts = 30;
     
@@ -138,7 +154,7 @@ window.onload = function () {
     //     doodleDisplay.insertBefore(img, doodleDisplay.firstChild);
     //     observeSingleImage(img);
     
-    //     const maxImages = parseInt(document.body.dataset.maxImages, 10);
+    //     const maxImages = parseInt(document.body.dataset.maxImages, 10) || 10;
     //     while (doodleDisplay.children.length > maxImages) {
     //         doodleDisplay.removeChild(doodleDisplay.lastChild);
     //     }
