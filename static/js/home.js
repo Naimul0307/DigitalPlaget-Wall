@@ -184,7 +184,7 @@ function createInputField(event) {
     });
 }
 
-function addTextElement(text, x, y, fontSize = 100, color = 'rgb(0, 0, 0)') {
+function addTextElement(text, x, y, fontSize = 40, color = 'rgb(0, 0, 0)') {
     const maxTextWidth = canvas.width - 40; // Give 20px margin on each side
     ctx.font = `${fontSize}px Arial`;
 

@@ -61,6 +61,7 @@ app.get("/", (req, res) => {
 app.get("/main", (req, res) => res.sendFile(path.join(__dirname, "templates", "main_screen.html")));
 app.get("/index", (req, res) => res.sendFile(path.join(__dirname, "templates", "index.html")));
 
+
 app.get("/get_latest_doodles", (req, res) => {
     console.log("Doodles being sent:", doodleFiles);
     const maxImages = parseInt(process.env.MAX_IMAGES) || 18;
@@ -123,9 +124,10 @@ app.post("/update_settings", upload.single("bg_image_upload"), async (req, res) 
 
         let jsContent = fs.readFileSync(jsFilePath, "utf8");
         jsContent = jsContent.replace(
-            /const maxImages\s*=\s*parseInt\(document\.body\.dataset\.maxImages,\s*\d+\)\s*\|\|\s*\d+;/,
-            `const maxImages = parseInt(document.body.dataset.maxImages, ${max_images}) || ${max_images};`
+            /const maxImages\s*=\s*parseInt\(document\.body\.dataset\.maxImages,\s*\d+\)/,
+            `const maxImages = parseInt(document.body.dataset.maxImages, 10) || ${max_images}`
         );
+        
         fs.writeFileSync(jsFilePath, jsContent);
 
         // ✅ Save Doodle Settings in config.json
