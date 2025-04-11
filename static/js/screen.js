@@ -60,7 +60,7 @@ window.onload = function () {
         const now = Date.now();
         const loopDuration = 8000;
         const offset = (now % loopDuration) / 1000;
-        img.style.animation = `floatOutTop 8s linear infinite`; // Apply animation
+        img.style.animation = `floatOutTop 12s linear infinite`;
         img.style.animationDelay = `-${offset}s`;
         img.style.position = 'absolute';
       
